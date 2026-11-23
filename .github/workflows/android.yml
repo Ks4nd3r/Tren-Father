@@ -21,6 +21,11 @@ jobs:
           java-version: '17'
       - name: Check data storage
         run: python -m unittest discover -s tests
+      - name: Restore Android SDK and NDK cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-global-${{ runner.os }}-api35-v1
       - name: Install build tools
         run: |
           sudo apt-get update
@@ -28,7 +33,25 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install buildozer setuptools cython==0.29.34
       - name: Build debug APK
-        run: buildozer android debug
+        run: |
+          set -o pipefail
+          if buildozer android debug 2>&1 | tee buildozer.log; then
+            echo "APK built successfully" >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "### Buildozer error (last 120 lines)"
+              echo '```text'
+              tail -n 120 buildozer.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildozer-log
+          path: buildozer.log
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
