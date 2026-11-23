@@ -1,0 +1,17 @@
+# Сборки
+**/build/
+*.apk
+*.aab
+
+# Gradle
+.gradle/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Локальные настройки (пути к SDK)
+local.properties
+
+# Ключи
+*.keystore
