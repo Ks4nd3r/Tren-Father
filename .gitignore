@@ -15,3 +15,10 @@ local.properties
 
 # Ключи
 *.keystore
+
+# Python / Buildozer
+__pycache__/
+*.pyc
+.venv/
+.buildozer/
+bin/

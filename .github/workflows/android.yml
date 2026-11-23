@@ -1,0 +1,36 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Check data storage
+        run: python -m unittest discover -s tests
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip build-essential libffi-dev libssl-dev autoconf automake libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake
+          python -m pip install --upgrade pip
+          python -m pip install buildozer setuptools cython==0.29.34
+      - name: Build debug APK
+        run: buildozer android debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: workout-diary-apk
+          path: bin/*.apk
